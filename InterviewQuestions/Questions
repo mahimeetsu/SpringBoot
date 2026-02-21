@@ -1,0 +1,107 @@
+What is Spring Boot?
+-------------------
+  Spring Boot is opinionated Spring that reduces boilerplate configuration and helps bootstrap production-ready applications quickly.
+But for me, the real value is not auto-configuration — it’s:
+Embedded container (Tomcat/Jetty)
+Externalized configuration
+Production features like Actuator
+Easy integration with Spring ecosystem
+In one of our projects, we migrated from traditional Spring MVC with XML config to Spring Boot. That reduced deployment complexity and improved startup time by ~30%.
+
+How Does Auto-Configuration Work?
+----------------------------------
+In Spring Boot, auto-configuration automatically sets up your application based on:
+What’s on the classpath
+What beans already exist
+What’s defined in application.properties / application.yml
+The current environment
+It reduces the need for manual configuration.
+
+When your Spring Boot app starts:
+
+@SpringBootApplication is processed
+Auto-configuration classes are loaded
+Conditions are evaluated
+Matching configurations are applied
+Default beans are created (unless you override them)
+
+Step-by-Step Internal Process
+1️⃣ @SpringBootApplication Enables Auto-Configuration
+@SpringBootApplication
+public class MyApp {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApp.class, args);
+    }
+}
+
+@SpringBootApplication includes @EnableAutoConfiguration and That annotation triggers the entire auto-configuration mechanism.
+
+Spring Boot Loads Auto-Configuration Classes
+Spring Boot looks inside:META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+(Older versions used spring.factories.)
+
+This file lists all auto-configuration classes like:
+DataSourceAutoConfiguration
+WebMvcAutoConfiguration
+SecurityAutoConfiguration
+Spring loads these classes automatically.
+
+Conditional Evaluation (The Core Logic)
+
+Each auto-configuration class is guarded by conditions like:
+@ConditionalOnClass
+@ConditionalOnMissingBean
+@ConditionalOnProperty
+@ConditionalOnWebApplication
+
+Example:
+@ConditionalOnClass(DataSource.class)
+@ConditionalOnMissingBean(DataSource.class)
+
+This means:
+IF a DataSource class exists
+AND the user has not defined one
+THEN create a default DataSource
+
+This is how Spring Boot avoids overriding your custom configuration.
+
+Example: Web Application
+
+If you add:spring-boot-starter-web
+
+Spring Boot detects:
+DispatcherServlet
+Tomcat classes
+Then it auto-configures:
+Embedded Apache Tomcat
+Spring MVC
+JSON via Jackson
+Default error handling
+You write zero configuration.
+
+
+Example: Database Auto-Configuration
+If you add:
+spring-boot-starter-data-jpa
+Spring Boot checks:
+Is DataSource on the classpath?
+Are database properties defined?
+Is JPA present?
+If yes → it configures:
+DataSource
+EntityManager
+TransactionManager
+Hibernate
+But if you define your own @Bean DataSource, Boot backs off.
+That’s the key principle:
+Auto-configure, but don’t override user configuration
+
+🧠 The Back-Off Strategy
+Spring Boot follows this rule:
+If user defines it → use user bean
+If user doesn't define it → create default bean
+This is controlled mainly by:@ConditionalOnMissingBean
+
+
+
+
