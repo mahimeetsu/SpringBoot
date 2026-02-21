@@ -200,3 +200,34 @@ Undertow
 Example:
 TomcatWebServer.start()
 The server binds to the configured port (default 8080).
+
+
+Embedded Server Support in Spring Boot:
+--------------------------------------
+  Embedded server support means your application includes and runs a web server inside the same JVM process, instead of deploying your app to an external server.
+
+So instead of:
+Build WAR → Deploy to external Tomcat → Start Tomcat → Run app
+You simply:
+Run main() → Server starts automatically → App is ready
+
+What Does “Embedded Server” Mean?
+
+An embedded server is a web server packaged as a library (dependency) inside your application.
+When your app starts:
+Spring Boot creates the ApplicationContext
+It creates and configures the web server
+It starts the server automatically
+It listens on a port (default: 8080)
+All within the same process.
+🌐 Supported Embedded Servers
+Spring Boot supports:
+Apache Tomcat (default)
+Jetty
+Undertow
+
+How It Gets Added
+When you include: spring-boot-starter-web,It automatically pulls in: spring-boot-starter-tomcat and Embedded Tomcat libraries
+You don’t install Tomcat separately.
+
+Embedded server support means your Spring Boot application contains and starts its own web server internally, eliminating the need for external deployment.
