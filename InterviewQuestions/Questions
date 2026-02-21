@@ -105,3 +105,98 @@ This is controlled mainly by:@ConditionalOnMissingBean
 
 
 
+How does Spring Boot start internally?
+-------------------------------------
+main() Method Executes
+
+Every Spring Boot app starts from:
+@SpringBootApplication
+public class MyApp {
+    public static void main(String[] args) {
+        SpringApplication.run(MyApp.class, args);
+    }
+}
+
+The key entry point is:
+SpringApplication.run(...)
+
+This is where everything begins.
+
+SpringApplication Is Created:
+SpringApplication.run() does roughly this internally:
+SpringApplication app = new SpringApplication(MyApp.class);
+app.run(args);
+During construction:
+Determines WebApplicationType
+SERVLET (Spring MVC)
+REACTIVE (WebFlux)
+NONE
+
+Loads:
+ApplicationContextInitializers
+ApplicationListeners
+Sets up default configuration
+
+Application Run Lifecycle Begins
+Inside run():
+
+Step A: Prepare Environment
+Creates Environment (StandardEnvironment or StandardServletEnvironment)
+Loads:
+application.properties / application.yml
+Profile-specific configs
+System properties
+Environment variables
+Resolves active profiles
+
+Step B: Print Banner
+Spring Boot prints the banner:
+:: Spring Boot ::
+(You can disable or customize it.)
+
+Step C: Create ApplicationContext
+Depending on the application type:
+Type	Context Created
+Servlet	AnnotationConfigServletWebServerApplicationContext
+Reactive	AnnotationConfigReactiveWebServerApplicationContext
+None
+This is the core Spring IoC container.
+
+Auto-Configuration Happens
+This is the magic part.
+Because of:
+@SpringBootApplication
+
+Which includes:
+@Configuration
+@EnableAutoConfiguration
+@ComponentScan
+🔹 @EnableAutoConfiguration
+
+Triggers:
+AutoConfigurationImportSelector
+It:
+Reads:
+META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+Loads auto-configuration classes
+Applies conditional annotations like:
+@ConditionalOnClass
+@ConditionalOnMissingBean
+@ConditionalOnProperty
+
+This is how:
+Tomcat is configured
+DataSource is created
+Jackson is configured
+Spring MVC is set up etc.
+
+Embedded Server Starts (If Web App)
+If it's a web application:
+Spring Boot creates embedded server:
+Tomcat (default)
+Jetty
+Undertow
+
+Example:
+TomcatWebServer.start()
+The server binds to the configured port (default 8080).
